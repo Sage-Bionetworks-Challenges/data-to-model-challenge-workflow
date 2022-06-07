@@ -1,35 +1,44 @@
 #!/usr/bin/env cwl-runner
-#
-# Prediction file challenge workflow
-# Inputs:
-#   submissionId: Submission ID to run this workflow on
-#   adminUploadSynId: Synapse ID of Folder accessible by admin user/team
-#   submitterUploadSynId: Synapse ID of Folder accessible by submitter
-#   workflowSynapseId: Synapse ID of File that links to workflow archive
-#   synapseConfig: filepath to .synapseConfig file
 
 cwlVersion: v1.0
 class: Workflow
+label: <YOUR CHALLENGE> Evaluation
+doc: >
+  BRIEF DESCRIPTION ABOUT THE CHALLENGE, e.g.
+  This workflow will run and evaluate Docker submissions to the
+  Awesome Challenge (syn123). Metrics returned are x, y, z.
 
 requirements:
   - class: StepInputExpressionRequirement
 
 inputs:
-  - id: submissionId
+  submissionId:
+    label: Submission ID
     type: int
-  - id: adminUploadSynId
+  submitterUploadSynId:
+    label: Synapse Folder ID accessible by the submitter
     type: string
-  - id: submitterUploadSynId
-    type: string
-  - id: workflowSynapseId
-    type: string
-  - id: synapseConfig
+  synapseConfig:
+    label: filepath to .synapseConfig file
     type: File
 
-# No output; everything is uploaded to Synapse.
-outputs: []
+outputs: {}
 
 steps:
+
+  set_submitter_folder_permissions:
+    run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/set_permissions.cwl
+    in:
+      - id: entityid
+        source: "#submitterUploadSynId"
+      # TODO: replace `valueFrom` with the admin user ID or admin team ID
+      - id: principalid
+        valueFrom: "3379097"
+      - id: permissions
+        valueFrom: "download"
+      - id: synapse_config
+        source: "#synapseConfig"
+    out: []
 
   download_submission:
     run: https://raw.githubusercontent.com/Sage-Bionetworks/ChallengeWorkflowTemplates/v3.1/cwl/get_submission.cwl
@@ -58,7 +67,7 @@ steps:
       - id: filepath
 
   validate:
-    run: validate.cwl
+    run: steps/validate.cwl
     in:
       - id: input_file
         source: "#download_submission/filepath"
@@ -112,7 +121,7 @@ steps:
     out: [finished]
 
   score:
-    run: score.cwl
+    run: steps/score.cwl
     in:
       - id: input_file
         source: "#download_submission/filepath"
