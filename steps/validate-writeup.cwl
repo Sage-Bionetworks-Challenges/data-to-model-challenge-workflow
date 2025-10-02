@@ -1,35 +1,34 @@
 #!/usr/bin/env cwl-runner
 cwlVersion: v1.0
 class: CommandLineTool
-doc: Validate predictions prior to scoring
+doc: Validate a Project (writeup) submission
 
 requirements:
 - class: InlineJavascriptRequirement
-- class: InitialWorkDirRequirement
-  listing:
-  - entryname: validate.py
-    entry:
-      $include: ../evaluation/validate.py
 
 inputs:
-- id: pred_file
-  type: File
-- id: groundtruth_file
-  type: File?
+- id: submissionid
+  type: int
+- id: challengewiki
+  type: string
+- id: public
+  type: boolean?
   inputBinding:
-    prefix: -g
-- id: entity_type
+    prefix: --public
+- id: admin
   type: string?
   inputBinding:
-    prefix: -e
-- id: previous_annotation_finished
-  type: boolean?
+    prefix: --admin
+- id: synapse_config
+  type: File
+- id: output_file
+  type: string
 
 outputs:
 - id: results
   type: File
   outputBinding:
-    glob: results.json
+    glob: $(inputs.output_file)
 - id: status
   type: string
   outputBinding:
@@ -43,15 +42,15 @@ outputs:
     outputEval: $(JSON.parse(self[0].contents)['submission_errors'])
     loadContents: true
 
-baseCommand:
-- python3
-- validate.py
+baseCommand: challengeutils
 arguments:
-- prefix: -p
-  valueFrom: $(inputs.pred_file.path)
+- prefix: -c
+  valueFrom: $(inputs.synapse_config.path)
+- valueFrom: validate-project
+- valueFrom: $(inputs.submissionid)
 - prefix: -o
   valueFrom: results.json
 
 hints:
   DockerRequirement:
-    dockerPull: sagebionetworks/synapsepythonclient:v3.1.1  # TODO: update image as needed; see evaluation/README.md for more details
+    dockerPull: sagebionetworks/challengeutils:v4.0.1
