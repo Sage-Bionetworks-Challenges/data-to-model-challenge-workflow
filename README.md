@@ -2,3 +2,6 @@
 
 This repository provides a ready-to-use template for setting up a
 data2model workflow to be used with a challenge hosted on Synapse.
+
+→ See also: [SynapseWorkflowOrchestrator](https://github.com/Sage-Bionetworks/SynapseWorkflowOrchestrator)
+
