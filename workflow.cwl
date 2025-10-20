@@ -41,7 +41,7 @@ inputs:
     default: "syn123"  # Placeholder - MUST be updated
 
   # ------------------------------------------------------------------------------
-  # Optional challenge configuration.
+  # Optional challenge configuration - update as needed.
   # ------------------------------------------------------------------------------
   errors_only:
     label: Send email notifications only for errors (no notification for valid submissions)
